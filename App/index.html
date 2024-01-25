@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>音声処理デモ</title>
+  <script src="https://cdn.jsdelivr.net/npm/fft.js@4.0.4"></script>
+</head>
+<body>
+  <button id="startButton">音声入力開始</button>
+  <script>
+    document.getElementById('startButton').addEventListener('click', () => {
+      navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        .then(stream => {
+          const audioContext = new AudioContext();
+          const source = audioContext.createMediaStreamSource(stream);
+          const processor = audioContext.createScriptProcessor(1024, 1, 1);
+
+          source.connect(processor);
+          processor.connect(audioContext.destination);
+
+          processor.onaudioprocess = (e) => {
+            const inputBuffer = e.inputBuffer.getChannelData(0);
+            const f = new FFT(1024);
+            const out = f.createComplexArray();
+
+            // ここでFFTの結果を処理します
+            console.log(out); // FFT結果をコンソールに出力
+          };
+        })
+        .catch(error => {
+          console.error('Error accessing audio stream: ', error);
+        });
+    });
+  </script>
+</body>
+</html>
